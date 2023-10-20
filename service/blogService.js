@@ -4,6 +4,7 @@ const { ValidationError } = require("../utils/errors");
 const { addBlogDao, findBlogByPageDao, findBlogByIdDao, updateBlogDao, deleteBlogDao } = require("../dao/blogDao");
 const { formatResponse, handleDataPattern, handleTOC } = require("../utils/tool");
 const { addBlogToType, findOneBlogTypeDao } = require("../dao/blogTypeDao");
+const { deleteMessageByBlogIdDao } = require("../dao/messageDao");
 
 // 扩展验证规则
 validate.validators.categoryIdIsExist = async function(value) {
@@ -129,6 +130,21 @@ module.exports.updateBlogService = async function(id, newBlogInfo) {
 
     newBlogInfo.toc = JSON.stringify('["a": "b"]');
   }
+  // 修改了文章分类需要将之前的文章分类自减然后新的文章分类自增
+  const { dataValues: oldBlogInfo } = await findBlogByIdDao(id);
+  if(newBlogInfo.categoryId !== oldBlogInfo.categoryId) {
+    // 分类信息被修改了
+    // 旧的自减
+    const oldBlogType = await findOneBlogTypeDao(oldBlogInfo.categoryId)
+    oldBlogType.articleCount--;
+    oldBlogType.save();
+
+    // 新的自增
+    const newBlogType = await findOneBlogTypeDao(newBlogInfo.categoryId)
+    newBlogType.articleCount++;
+    newBlogType.save();
+  }
+
   const { dataValues } = await updateBlogDao(id, newBlogInfo);
   return formatResponse(200, "", dataValues);
 }
@@ -141,9 +157,11 @@ module.exports.deleteBlogService = async function(id) {
   const categoryInfo = await findOneBlogTypeDao(data.dataValues.categoryId);
   categoryInfo.articleCount--;
   await categoryInfo.save();
-  // todo删除文章下面的评论
+  // 删除文章下面的评论
+  await deleteMessageByBlogIdDao(id)
 
   // 删除文章
   await deleteBlogDao(id);
   return formatResponse(200, "", true);
 }
+

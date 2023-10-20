@@ -56,10 +56,20 @@ module.exports.findMessageByPageDao = async function(pageInfo) {
   }
 }
 
+// 删除留言或评论
 module.exports.deleteMessageDao = async function(id) {
   return await messageModel.destroy({
     where: {
       id
+    }
+  })
+}
+
+// 使用blogId删除评论
+module.exports.deleteMessageByBlogIdDao = async function(blogId) {
+  return await messageModel.destroy({
+    where: {
+      blogId
     }
   })
 }

@@ -2,6 +2,7 @@ const validate = require("validate.js");
 const { ValidationError } = require("../utils/errors");
 const { addBlogTypeDao, findAllBlogTypeDao, findOneBlogTypeDao, updateBlogTypeDao, deleteBlogTypeDao } = require("../dao/blogTypeDao");
 const { formatResponse, handleDataPattern } = require("../utils/tool");
+const { blogCountByBlogType } = require("../dao/blogDao");
 
 // 新增博客分类
 module.exports.addBlogTypeService = async function(newBlogTypeInfo) {
@@ -51,7 +52,8 @@ module.exports.updateBlogTypeService = async function(id, newBlogTypeInfo) {
 
 // 删除其中一个博客分类
 module.exports.deleteBlogTypeService = async function(id) {
+  const count = await blogCountByBlogType(id);
   await deleteBlogTypeDao(id);
-  // todo 返回值需要返回受到影响的文章数量
-  return formatResponse(200, "", true)
+  // 返回值需要返回受到影响的文章数量
+  return formatResponse(200, "", count)
 }
