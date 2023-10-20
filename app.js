@@ -22,6 +22,8 @@ var captchaRouter = require('./routes/captcha');
 var uploadRouter = require('./routes/upload');
 var blogTypeRouter = require('./routes/blogType');
 var blogRouter = require('./routes/blog');
+var demoRouter = require('./routes/demo');
+var messageRouter = require('./routes/message');
 
 // 创建实例
 var app = express();
@@ -52,7 +54,10 @@ app.use(expressjwt({
     { "url": "/api/blog", methods: ["GET"] },
     { "url": /\/api\/blog\/\d/, methods: ["GET"] },
     { "url": "/api/banner", methods: ["GET"] },
-    { "url": "/res/blogtype", methods: ["GET"] }
+    { "url": "/api/blogtype", methods: ["GET"] },
+    { "url": "/api/project", methods: ["GET"] },
+    { "url": "/api/message", methods: ["POST", "GET"] },
+    { "url": "/api/comment", methods: ["POST", "GET"] }
   ]
 }))
 
@@ -63,6 +68,9 @@ app.use('/res/captcha', captchaRouter);
 app.use('/api/blogType', blogTypeRouter);
 app.use('/api/upload', uploadRouter);
 app.use('/api/blog', blogRouter);
+app.use('/api/project', demoRouter);
+app.use('/api/comment', messageRouter);
+app.use('/api/message', messageRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
